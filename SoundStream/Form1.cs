@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using CSCore.CoreAudioAPI;
 using CSCore.SoundIn;
+using CSCore.Codecs.WAV;
 
 namespace SoundStream
 {
@@ -30,6 +31,32 @@ namespace SoundStream
             {
                 checkLabel.Text = "WASAPI capture is not supported.";
             }
+        }
+
+        private void recordTenWAVButton_Click(object sender, EventArgs e)
+        {
+            //recordTenWAVLabel.Text = "Recording...";
+            WasapiLoopbackCapture capture = new WasapiLoopbackCapture();
+            capture.Initialize();
+            using (WaveWriter w = new WaveWriter("dump.wav", capture.WaveFormat))
+            {
+                //setup an eventhandler to receive the recorded data
+                capture.DataAvailable += (s, f) =>
+                {
+                    //save the recorded audio
+                    w.Write(f.Data, f.Offset, f.ByteCount);
+                };
+
+                //start recording
+               
+                capture.Start();
+
+                System.Threading.Thread.Sleep(10000);
+
+                //stop recording
+                capture.Stop();
+            }
+            //recordTenWAVLabel.Text = "Ready";
         }
     }
 }
